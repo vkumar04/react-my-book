@@ -1,39 +1,50 @@
-import React, { Component } from 'react';
+import React from 'react'
+import { Route } from 'react-router-dom'
+import ListBooks from './ListBooks'
+import SearchBooks from './SearchBooks'
 import * as BooksAPI from './BooksAPI'
+import './App.css'
 
-import ListBooks from './ListBooks';
+class BooksApp extends React.Component {
+  state = {
+    books: []
+  }
 
-class App extends Component {
+  componentDidMount() {
+    BooksAPI.getAll().then(books => {
+      this.setState({ books });
+    });
+  }
 
-	state = {
-		books: [],
-		read: [],
-		wantToRead: [],
-		currentlyReading: []
-	}
+  updateBook = (book, shelf) => {
+    BooksAPI.update(book, shelf).then(() => {
+      this.setState(state => ({
+        books: state.books.filter(b => b.id !== book.id).concat([ book ])
+      }))
+    });
+  }
 
-	componentDidMount() {
-		BooksAPI.getAll().then((books) => {
-			this.setState({ books: books })
-			console.log(books);
-		})
-	}
-
-	updateShelves = () => {
-		const {books} = this.state
-		let currentlyReading = books.filter((book) => book.shelf === 'currentlyReading')
-		let wantToRead = books.filter((book) => book.shelf === 'wantToRead')
-		let read = books.filter((book) => book.shelf === 'read')
-		this.setState({currentlyReading, wantToRead, read})
-	}
-
-	render() {
-		return (
-			<div>
-				<ListBooks books={this.state.books}/>
+  render() {
+    const { books } = this.state
+    const updateBook = this.updateBook
+    return (
+      <div className="app">
+        <Route exact path="/" render={() => (
+          <ListBooks
+            books={books}
+            updateBook={updateBook}
+          />
+        )}/>
+        <Route path="/search" render={() => (
+          <SearchBooks
+            updateBook={updateBook}
+            bookIds={books.map(b => b.id)}
+            bookShelves={books.map(b => b.shelf)}
+          />
+        )}/>
       </div>
-		)
-	}
+    )
+  }
 }
 
-export default App;
+export default BooksApp
