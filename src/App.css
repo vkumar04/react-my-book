@@ -12,7 +12,7 @@ body, .app {
 
 .list-books-title {
   padding: 10px 0;
-  background: #202020;
+  background: linear-gradient(to right, #43c6ac, #191654);
   text-align: center;
 }
 .list-books-title h1 {
